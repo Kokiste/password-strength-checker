@@ -1,33 +1,36 @@
-password = input("Enter a password to check:")
-length = len(password)
-print(f"Your password is {length} characters long.")
-if length >= 8:
-    print("Length: OK (8+ characters)")
-else:
-    print("Length: Too short (needs 8+ characters)")
-has_digit = False
-has_upper = False
-has_special = False
-has_lower = False
-for char in password:
-    if char.isdigit():
-        has_digit = True
-    if char.isupper():
-        has_upper = True
-    if not char.isalnum():
-        has_special = True
-    if char.islower():
-        has_lower = True
+from zxcvbn import zxcvbn
+def check_password(password):
+    length = len(password)
+    if length < 8:
+        return "Weak — password is too short (needs 8+ characters)"
+    
+    has_digit = False
+    has_upper = False
+    has_special = False
+    has_lower = False
+    
+    for char in password:
+        if char.isdigit():
+            has_digit = True
+        if char.isupper():
+            has_upper = True
+        if not char.isalnum():
+            has_special = True
+        if char.islower():
+            has_lower = True
 
-print(f"Has digit: {has_digit}")
-print(f"Has uppercase: {has_upper}")
-print(f"Has special: {has_special}")
-print(f"Has lowercase: {has_lower}")
-score = has_digit + has_upper + has_lower + has_special
-print(f"Score: {score}")
-if length >= 8 and score == 4:
-    print("password is strong")
-elif length >= 8 and (score == 2 or score == 3):
-    print("password is medium")
-else:
-    print("password is weak")
+    score = int(has_digit) + int(has_upper) + int(has_lower) + int(has_special)
+
+    zxcvbn_result = zxcvbn(password)
+    zxcvbn_score = zxcvbn_result["score"]
+
+    if score == 4 and zxcvbn_score >= 3:
+        return "Strong"
+    elif score in (2, 3) and zxcvbn_score >= 2:
+        return "Medium"
+    else:
+        return "Weak"
+    
+password = input("Enter a password to check: ")
+result = check_password(password)
+print(result)
